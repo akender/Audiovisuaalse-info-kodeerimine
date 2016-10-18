@@ -1,10 +1,11 @@
 __author__ = "Arno Kender (163256IATM)"
-__version__ = "2.0"
+__version__ = "3.0"
 __email__ = "arno.kender@gmail.com"
 
 # ::: Huffmani kooder :::
 import json
 from math import log
+from os import path
 
 
 # ::: Custom object :::
@@ -39,6 +40,7 @@ def getparams(source) -> dict:
         result['frequency'][i] = source.count(i)
         result['probability'][i] = float(result['frequency'][i]) / len(source)
         result['entropy'][i] = -(result['probability'][i] * log(result['probability'][i], 2))
+    makejsonfile(result['frequency'], 'table_frequency.json')
     return result
 
 
@@ -57,10 +59,18 @@ def getredundancy(avgcodelength, entropy) -> float:
 
 # ::: Koodi efektiivsuse arvutamine :::
 def getcompressionratio(uncompressedsource, compressedsource) -> float:
-    ucl = ''
+    # 1.514446940547989
+    """ucl = ''
     for i in list(uncompressedsource):
         ucl += bin(ord(i))[2:]
-    return float(len(ucl) / len(str(compressedsource)))
+    return float(len(ucl) / len(str(compressedsource)))"""
+
+    # 1.8046472811609955
+    """ul = path.getsize('data_decoded.txt')
+    return float(ul * 8 / len(str(compressedsource)))"""
+
+    # 1.7928471268662147
+    return float((len(uncompressedsource) * 8) / len(str(compressedsource)))
 
 
 # ::: Lisa sorteeritud j2rjekorda :::
