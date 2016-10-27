@@ -1,8 +1,18 @@
 __author__ = "Arno Kender (163256IATM)"
-__version__ = "2.0"
+__version__ = "3.0"
 __email__ = "arno.kender@gmail.com"
 
 # ::: LZW kooder ja dekooder :::
+
+
+# ::: ASCII kontroll :::
+def asciifilter(information) -> list:
+    passed = []
+    for i in information:
+        if ord(i) < 128:
+            # exit('\nSisend ei vasta ASCII kodeeringule!')
+            passed.append(i)
+    return passed
 
 
 def getasciitbl():
@@ -56,9 +66,11 @@ def lzwdecode(codetable=[], code=[]) -> str:
     return text
 
 
-srcfile = open('input.txt', 'r')
+srcfile = open('input_test.txt', 'r')
+# srcfile = open('input.txt', 'r')
 srctxt = srcfile.read()
 srcfile.close()
+srctxt = asciifilter(srctxt)
 
 # src = ['wabbawabba', ['a', 'b', 'w']]
 # src = ['wabba_wabba_wabba_wabba_woo_woo_woo', ['_', 'a', 'b', 'o', 'w']]
