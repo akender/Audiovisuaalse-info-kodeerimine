@@ -1,8 +1,15 @@
 __author__ = "Arno Kender (163256IATM)"
-__version__ = "1.0"
+__version__ = "2.0"
 __email__ = "arno.kender@gmail.com"
 
-# ::: LZW kooder :::
+# ::: LZW kooder ja dekooder :::
+
+
+def initiateasciitbl():
+    tbl = []
+    for i in range(128):
+        tbl.append(chr(i))
+    return tbl
 
 
 def appendtolimitedlist(item, li=[], limit=1024):
@@ -58,7 +65,8 @@ def lzwdecode(codetable=[], code=[]) -> str:
 
 # src = ['wabbawabba', ['a', 'b', 'w']]
 # src = ['wabba_wabba_wabba_wabba_woo_woo_woo', ['_', 'a', 'b', 'o', 'w']]
-src = ['ratatatat_a_rat_at_a_rat', ['a', '_', 'r', 't']]
+# src = ['ratatatat_a_rat_at_a_rat', ['a', '_', 'r', 't']]
+src = ['ratatatat_a_rat_at_a_rat', initiateasciitbl()]
 print(src[0])
 print(src[1])
 cod = lzwencode(src[1], src[0])
