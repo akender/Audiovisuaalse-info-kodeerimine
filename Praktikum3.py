@@ -1,5 +1,5 @@
 __author__ = "Arno Kender (163256IATM)"
-__version__ = "3.0"
+__version__ = "4.0"
 __email__ = "arno.kender@gmail.com"
 
 # ::: LZW kooder ja dekooder :::
@@ -15,16 +15,16 @@ def asciifilter(information) -> list:
     return passed
 
 
-def getasciitbl():
-    tbl = []
-    for i in range(128):
-        tbl.append(chr(i))
-    return tbl
-
-
 def appendtolimitedlist(item, li=[], limit=1024):
     if len(li) < limit:
         li.append(item)
+
+
+def getasciitbl():
+    tbl = []
+    for i in range(128):
+        appendtolimitedlist(chr(i), tbl)
+    return tbl
 
 
 def lzwencode(codetable=[], text='') -> list:
@@ -43,7 +43,7 @@ def lzwencode(codetable=[], text='') -> list:
             last = current
     index = ctbl.index(last)
     code.append(index + 1)
-    # print(ctbl)
+    print('Lõplik tähestik (%s): %s' % (len(ctbl), ctbl))
     return code
 
 
@@ -62,12 +62,12 @@ def lzwdecode(codetable=[], code=[]) -> str:
         if combi not in ctbl:
             appendtolimitedlist(combi, ctbl)
         last_str = current_str
-    # print(ctbl)
+    print('Lõplik tähestik (%s): %s' % (len(ctbl), ctbl))
     return text
 
 
-srcfile = open('input_test.txt', 'r')
-# srcfile = open('input.txt', 'r')
+# srcfile = open('input_test.txt', 'r')
+srcfile = open('input.txt', 'r')
 srctxt = srcfile.read()
 srcfile.close()
 srctxt = asciifilter(srctxt)
@@ -76,15 +76,15 @@ srctxt = asciifilter(srctxt)
 # src = ['wabba_wabba_wabba_wabba_woo_woo_woo', ['_', 'a', 'b', 'o', 'w']]
 # src = ['ratatatat_a_rat_at_a_rat', ['a', '_', 'r', 't']]
 src = [srctxt, getasciitbl()]
-# print(src[0])
-print(src[1])
+# print('Allikas (%s): %s' % (len(src[0]), src[0]))
+print('Algne tähestik (%s): %s' % (len(src[1]), src[1]))
 cod = lzwencode(src[1], src[0])
-print(cod)
+print('Kood (%s): %s' % (len(cod), cod))
 print()
-print(cod)
-print(src[1])
+print('Kood (%s): %s' % (len(cod), cod))
+print('Algne tähestik (%s): %s' % (len(src[1]), src[1]))
 decod = lzwdecode(src[1], cod)
-# print(decod)
+# print('Tekst (%s): %s' % (len(decod), decod))
 
 dstfile = open('output.txt', 'w')
 dstfile.write(decod)
