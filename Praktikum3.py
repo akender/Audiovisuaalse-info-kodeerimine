@@ -20,7 +20,7 @@ def appendtolimitedlist(item, li=[], limit=1024):
         li.append(item)
 
 
-def getasciitbl():
+def getasciitbl() -> list:
     tbl = []
     for i in range(128):
         appendtolimitedlist(chr(i), tbl)
