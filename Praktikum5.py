@@ -1,10 +1,11 @@
 __author__ = "Arno Kender (163256IATM)"
-__version__ = "1.0"
+__version__ = "2.0"
 __email__ = "arno.kender@gmail.com"
 
 from PIL import Image
 import numpy as np
 from math import pi, cos, sqrt, log10
+import sys
 
 # ::: DCT kooder ja dekooder :::
 
@@ -16,7 +17,7 @@ filename = 'lena512.bmp'
 bmpimg = Image.open(filename, 'r')
 
 
-def getwhole(Q, bs):
+def getrecoveredcos(Q, bs):
     # Q - quarter matrix
     # bs - blocksize
     al, aw = np.shape(Q)
@@ -37,7 +38,7 @@ def getwhole(Q, bs):
     return B
 
 
-def getquarter(B, bs):
+def getquartercos(B, bs):
     # B -
     # bs - blocksize
     al, aw = np.shape(B)
@@ -76,10 +77,10 @@ def getdctsum(Ab, p, q):
     return sum(suml)
 
 
-def getnorm(Ab):
+def getcos(Ab):
     # Ab - block of A
     al, aw = np.shape(Ab)
-    alphas = getalphas(8)
+    alphas = getalphas(al)
     Bb = np.zeros((al, aw))  # block of B
     for p in range(al):
         for q in range(aw):
@@ -99,7 +100,7 @@ def getidctsum(Bb, m, n):
     return sum(suml)
 
 
-def getrecovered(Bb):
+def geticos(Bb):
     # Bb -
     al, aw = np.shape(Bb)
     Ab = np.zeros((al, aw))  # block of A
@@ -109,35 +110,37 @@ def getrecovered(Bb):
     return Ab
 
 
-def dct2(img, bs):
-    # img - bmp img
+def dct2(A, bs):
+    # A - original matrix
     # bs - blocksize
-    A = np.array(img)  # original matrix
     al, aw = np.shape(A)  # array length, width
     B = np.zeros((al, aw))
     for M in range(int(al / bs)):
         for N in range(int(aw / bs)):
+            sys.stdout.write('\rdct2() rida: %s, veerg: %s' % (str(M + 1), str(N + 1)))
             x1 = int(M * bs)
             x2 = int((M + 1) * bs)
             y1 = int(N * bs)
             y2 = int((N + 1) * bs)
-            B[x1:x2, y1:y2] = getnorm(A[x1:x2, y1:y2])
+            B[x1:x2, y1:y2] = getcos(A[x1:x2, y1:y2])
+    print()
     return B
 
 
-def idct2(Q, bs):
-    # Q - quarter matrix
+def idct2(B, bs):
+    # B -
     # bs - blocksize
-    B = getwhole(Q, bs)
     al, aw = np.shape(B)
     A = np.zeros((al, aw))  # recovered matrix
     for M in range(int(al / bs)):
         for N in range(int(aw / bs)):
+            sys.stdout.write('\ridct2() rida: %s, veerg: %s' % (str(M + 1), str(N + 1)))
             x1 = int(M * bs)
             x2 = int((M + 1) * bs)
             y1 = int(N * bs)
             y2 = int((N + 1) * bs)
-            A[x1:x2, y1:y2] = getrecovered(B[x1:x2, y1:y2])
+            A[x1:x2, y1:y2] = geticos(B[x1:x2, y1:y2])
+    print()
     return A
 
 
@@ -146,7 +149,7 @@ def mse(A, B):
     li = []
     for i in range(al):
         for j in range(aw):
-            li.append(pow((int(B[i, j]) - int(A[i, j])), 2))
+            li.append(pow((int(A[i, j]) - int(B[i, j])), 2))
     return sqrt(sum(li) / len(li))
 
 
@@ -161,16 +164,18 @@ def snr(A, B):
     return 10 * log10(pow(s1, 2) / pow(s1 - s2, 2))
 
 
-bmatrix = dct2(bmpimg, blocksize)
-bquarter = getquarter(bmatrix, blocksize)
-amatrix = idct2(bquarter, blocksize)
-idct = amatrix.astype('uint8')
-im = Image.fromarray(idct)
-im.save('recovered.jpeg')
+original = np.array(bmpimg)
+cosmatrix = dct2(original, blocksize)
+quartercos = getquartercos(cosmatrix, blocksize)
+recoveredcos = getrecoveredcos(quartercos, blocksize)
+recovered = idct2(recoveredcos, blocksize)
+Image.fromarray(recovered.astype('uint8')).save('recovered.jpeg')
 
-print('MSE: %s' % mse(amatrix, bmatrix))
-print('SNR: %s' % snr(amatrix, bmatrix))
-print('Tihendamise efektiivsus: %s' % ((8 * 512 * 512) / (8 * 256 * 256)))
+print('\nMSE: %s' % mse(original, recovered))
+print('SNR: %s' % snr(original, recovered))
+al1, aw1 = np.shape(original)
+al2, aw2 = np.shape(quartercos)
+print('Tihendamise efektiivsus: %s\n' % ((al1 * aw1 * blocksize) / (al2 * aw2 * blocksize)))
 X = 1
 Y = 1
-print('Vabalt valitud bloki teisendatud maatriks:\n%s' % (str(bmatrix[(X - 1) * 8:X * 8, (Y - 1) * 8:Y * 8])))
+print('Vabalt valitud bloki teisendatud maatriks:\n%s' % (str(cosmatrix[(X - 1) * blocksize:X * blocksize, (Y - 1) * blocksize:Y * blocksize])))
